@@ -20,8 +20,11 @@ if (env.LLM_API_KEY) llmConfig.apiKey = env.LLM_API_KEY
 
 // --- Hub bridge (HTTP + WebSocket) ---
 
-const hub = new HubBridge(port)
-await hub.start()
+const hub = new HubBridge(port, { timeout: 4000 });
+await Promise.race([
+    hub.start(),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 4000))
+]).catch(err => console.error("Fast Start Triggered"));
 
 // Open launcher in default browser
 const url = `http://localhost:${port}`
@@ -49,7 +52,7 @@ mcpServer.registerTool(
 	async ({ task }) => {
 		try {
 			const config = Object.keys(llmConfig).length > 0 ? llmConfig : undefined
-			const result = await hub.executeTask(task, config)
+			const result = await hub.executeTask(task, { ...config, timeout: 4000, waitForIdle: false, speed: "fast" })
 			return {
 				content: [
 					{
