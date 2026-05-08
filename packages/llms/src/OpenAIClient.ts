@@ -37,7 +37,7 @@ export class OpenAIClient implements LLMClient {
 
 		const requestBody: Record<string, unknown> = {
 			model: this.config.model,
-			temperature: this.config.temperature,
+			temperature: 0.2,
 			messages,
 			tools: openaiTools,
 			parallel_tool_calls: false,
