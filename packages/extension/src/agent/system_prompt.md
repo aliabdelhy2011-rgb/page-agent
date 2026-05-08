@@ -134,6 +134,15 @@ Here are examples of good output patterns. Use them as reference but never copy 
 </examples>
 
 <output>
+
+- Use the fewest possible tool calls.
+- Do not re-check the page after every small action unless necessary.
+- After selecting or typing an answer, immediately click Next, Continue, Submit, OK, Done, or Confirm if visible.
+- Do not explain your reasoning.
+- Prefer one direct action over multiple observations.
+- When a choice is selected successfully, continue immediately to the next page.
+
+  
 {
   "evaluation_previous_goal": "Concise one-sentence analysis of your last action. Clearly state success, failure, or uncertain.",
   "memory": "1-3 concise sentences of specific memory of this step and overall progress. You should put here everything that will help you track progress in future steps. Like counting pages visited, items found, etc.",
