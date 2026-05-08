@@ -109,21 +109,88 @@ export class RemotePageController {
 			targetTabId: this.currentTabId,
 		})
 	}
+private async autoClickNext(): Promise<void> {
+    try {
+        await this.remoteCallDomAction('evaluate', [`
+            (() => {
+                const items = [...document.querySelectorAll('button, input[type="button"], input[type="submit"], a')]
 
+                const nextBtn = items.find(el => {
+                    const text = (el.innerText || el.value || el.getAttribute('aria-label') || '').toLowerCase().trim()
+
+                    return (
+                        text === 'next' ||
+                        text === 'continue' ||
+                        text === 'submit' ||
+                        text === 'ok' ||
+                        text === 'done' ||
+                        text === 'confirm' ||
+                        text.includes('next') ||
+                        text.includes('continue')
+                    )
+                })
+
+                if (nextBtn && !nextBtn.disabled) {
+                    nextBtn.click()
+                    return true
+                }
+
+                return false
+            })()
+        `])
+    } catch (e) {}
+}
+	private async autoClickNext(): Promise<void> {
+    try {
+        await this.remoteCallDomAction('evaluate', [`
+            (() => {
+                const items = [...document.querySelectorAll('button, input[type="button"], input[type="submit"], a')]
+
+                const nextBtn = items.find(el => {
+                    const text = (el.innerText || el.value || el.getAttribute('aria-label') || '').toLowerCase().trim()
+
+                    return (
+                        text === 'next' ||
+                        text === 'continue' ||
+                        text === 'submit' ||
+                        text === 'ok' ||
+                        text === 'done' ||
+                        text === 'confirm' ||
+                        text.includes('next') ||
+                        text.includes('continue')
+                    )
+                })
+
+                if (nextBtn && !nextBtn.disabled) {
+                    nextBtn.click()
+                    return true
+                }
+
+                return false
+            })()
+        `])
+    } catch (e) {}
+}
 	async clickElement(...args: any[]): Promise<DomActionReturn> {
-		const res = await this.remoteCallDomAction('click_element', args)
-		// @note may cause page navigation, wait for 1 second to ensure the page loading started
-		await new Promise((resolve) => setTimeout(resolve, 1000))
-		return res
-	}
+    const res = await this.remoteCallDomAction('click_element', args)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await this.autoClickNext()
+    return res
+}
 
 	async inputText(...args: any[]): Promise<DomActionReturn> {
-		return this.remoteCallDomAction('input_text', args)
-	}
+    const res = await this.remoteCallDomAction('input_text', args)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await this.autoClickNext()
+    return res
+}
 
 	async selectOption(...args: any[]): Promise<DomActionReturn> {
-		return this.remoteCallDomAction('select_option', args)
-	}
+    const res = await this.remoteCallDomAction('select_option', args)
+    await new Promise((resolve) => setTimeout(resolve, 100))
+    await this.autoClickNext()
+    return res
+}
 
 	async scroll(...args: any[]): Promise<DomActionReturn> {
 		return this.remoteCallDomAction('scroll', args)
