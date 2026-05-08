@@ -111,11 +111,42 @@ export class RemotePageController {
 	}
 
 	async clickElement(...args: any[]): Promise<DomActionReturn> {
-		const res = await this.remoteCallDomAction('click_element', args)
-		// @note may cause page navigation, wait for 1 second to ensure the page loading started
-		await new Promise((resolve) => setTimeout(resolve, 1000))
-		return res
-	}
+    const res = await this.remoteCallDomAction('click_element', args)
+
+    // Faster navigation handling
+    await new Promise((resolve) => setTimeout(resolve, 300))
+
+    // Auto click next/continue buttons if visible
+    try {
+        await this.remoteCallDomAction('evaluate', [`
+            (() => {
+                const buttons = [...document.querySelectorAll('button, input[type="button"], input[type="submit"]')]
+
+                const nextBtn = buttons.find(btn => {
+                    const text = (btn.innerText || btn.value || '').toLowerCase()
+
+                    return (
+                        text.includes('next') ||
+                        text.includes('continue') ||
+                        text.includes('submit') ||
+                        text.includes('ok') ||
+                        text.includes('done') ||
+                        text.includes('confirm')
+                    )
+                })
+
+                if (nextBtn) {
+                    nextBtn.click()
+                    return true
+                }
+
+                return false
+            })()
+        `])
+    } catch (e) {}
+
+    return res
+}
 
 	async inputText(...args: any[]): Promise<DomActionReturn> {
 		return this.remoteCallDomAction('input_text', args)
